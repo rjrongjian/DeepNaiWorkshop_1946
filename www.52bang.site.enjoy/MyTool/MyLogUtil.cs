@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeepNaiWorkshop_1946
+namespace www_52bang_site_enjoy.MyTool
 {
-    public class Class1
+    public class MyLogUtil
     {
+        
     }
 }

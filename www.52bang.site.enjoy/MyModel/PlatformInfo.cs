@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace www._52bang.site.enjoy
+namespace www_52bang_site_enjoy.MyModel
 {
-    public class Class1
+    public class PlatformInfo
     {
+
+
     }
 }
