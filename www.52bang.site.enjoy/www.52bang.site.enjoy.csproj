@@ -65,6 +65,7 @@
     <Compile Include="MyPlugin.cs" />
     <Compile Include="MyTool\MyLinkCoverter.cs" />
     <Compile Include="MyTool\MyLogUtil.cs" />
+    <Compile Include="MyTool\MySystemUtil.cs" />
     <Compile Include="MyTool\MyUrlTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

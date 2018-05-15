@@ -2,7 +2,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,6 +20,16 @@ namespace www_52bang_site_enjoy.enjoy
         {
             mainForm = new MainForm();
             mainForm.Show();
+
+            string str = Assembly.GetExecutingAssembly().CodeBase;
+
+            mainForm.displayMsg2(str);
+            int start = 8;// 去除file:///  
+            int end = str.LastIndexOf('/');// 去除文件名xxx.dll及文件名前的/  
+            str = str.Substring(start, end - start);
+            mainForm.displayMsg2(str);
+            str = Path.GetDirectoryName(str);
+            mainForm.displayMsg2(str);
         }
         /// <summary>
         /// AppId需要与程序集名称相同
@@ -34,6 +46,11 @@ namespace www_52bang_site_enjoy.enjoy
         /// <returns></returns>
         public override int ProcessPrivateMessage(int subType, int sendTime, long fromQQ, string msg, int font)
         {
+            //用户发来的消息日志
+            MyLogUtil.WriteQQDialogueLog(fromQQ, msg);
+            //获取的消息
+            mainForm.displayMsg(msg);
+
             /*
              * [CQ:rich,url=https://v.youku.com/v_show/id_XMzU5NDQzNzIxNg==.html?sharefrom=iphone,text=极限挑战 第四季20180510 会员解读版第2期:演技滑铁卢!内含男人帮最想删的片段 ]
              */
@@ -43,6 +60,9 @@ namespace www_52bang_site_enjoy.enjoy
             string keywordsValue = (string)keywords[msg];
             if (!string.IsNullOrWhiteSpace(keywordsValue))
             {
+                //给用户回复的信息日志
+                MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, keywordsValue);
+                //发送消息
                 CoolQApi.SendPrivateMsg(fromQQ, keywordsValue);
                 return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
             }
@@ -53,20 +73,24 @@ namespace www_52bang_site_enjoy.enjoy
                 MyResponse<MovieInfo> myResponse = MyLinkCoverter.CovertInSuoIm(msg);
                 if (myResponse.Code == 0)//获取成功了
                 {
-                    CoolQApi.SendPrivateMsg(fromQQ, sendTime + " " + myResponse.Msg.MovieName + " " + myResponse.Msg.Url);
+                    //给用户回复的信息日志
+                    MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, myResponse.Msg.MovieName + " " + myResponse.Msg.Url);
+                    CoolQApi.SendPrivateMsg(fromQQ,  myResponse.Msg.MovieName + " " + myResponse.Msg.Url);
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
                 else
                 {
+                    //给用户回复的信息日志
+                    MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, SystemConfig.NoConvertPlatform);
                     CoolQApi.SendPrivateMsg(fromQQ,SystemConfig.NoConvertPlatform);
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
                 
             }
-            
-            //使用CoolQApi将信息回发给发送者
-            //CoolQApi.SendPrivateMsg(fromQQ, "头号玩家电影 http://suo.im/4zgAuL");
-            
+
+            //收到转账时消息体
+            //&#91;转账&#93; 0.01元转账需收款，请使用手机QQ查看。
+            //红包没有消息
             return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
         }
 

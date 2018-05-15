@@ -10,7 +10,9 @@ namespace www_52bang_site_enjoy.MyModel
     public class SystemConfig
     {
         //75个视频网站地址，http://www.zuanke8.com/archiver/?tid-4515701.html
-        public static string ResourceApi = "http://www.vipjiexi.com/yun.php?url=";
+        //public static string ResourceApi = "http://www.vipjiexi.com/yun.php?url=";
+        //public static string ResourceApi = "http://mlxztz.com/player.php?url=";
+        public static string ResourceApi = "http://www.52bang.site/dyxf/vipparser.html?url=";
         //指定特殊关键词，给与的回复信息
         public static Hashtable keywords = new Hashtable();
         //可解析的视频平台

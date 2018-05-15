@@ -43,5 +43,11 @@ namespace www_52bang_site_enjoy
         {
             this.textBox1.Text = msg;
         }
+
+
+        public void displayMsg2(string msg)
+        {
+            this.listBox1.Items.Add(msg);
+        }
     }
 }

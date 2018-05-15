@@ -22,9 +22,10 @@ namespace www_52bang_site_enjoy.MyTool
         {
             //解析酷q消息体中的url链接
             MovieInfo movie = parseMsg(cqMsg);
+            movie.OriginalUrl = SystemConfig.ResourceApi + movie.Url;
             //组成可观看的视频地址
             movie.Url = MyUrlTool.UrlEncode(SystemConfig.ResourceApi + movie.Url);
-            movie.OriginalUrl = SystemConfig.ResourceApi + movie.Url;
+            
             
             return movie;
         }
@@ -82,6 +83,7 @@ namespace www_52bang_site_enjoy.MyTool
             MovieInfo movieInfo = Covert(cqMsg);
             //转成短网址，例用suo.im
             movieInfo.Url = MyUrlTool.HttpGet("http://suo.im/api.php?url=" + movieInfo.Url, "");
+            
 
             MyResponse<MovieInfo> myResponse = new MyResponse<MovieInfo>(0, movieInfo);
             return myResponse;
