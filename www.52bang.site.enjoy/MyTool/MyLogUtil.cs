@@ -13,7 +13,7 @@ namespace www_52bang_site_enjoy.MyTool
         {
 
             StreamWriter streamWriter = new StreamWriter(MySystemUtil.GetQQDialogueDir() + qq + ".txt", true);
-            streamWriter.WriteLine(qq+" "+DateTime.Now.ToString("hh:mm:ss") + "=>" + str);
+            streamWriter.WriteLine(qq+" "+DateTime.Now.ToString("HH:mm:ss") + "=>" + str);
             //streamWriter.WriteLine("---------------------------------------------------------");
             streamWriter.Close();
         }
@@ -25,7 +25,15 @@ namespace www_52bang_site_enjoy.MyTool
         {
 
             StreamWriter streamWriter = new StreamWriter(MySystemUtil.GetQQDialogueDir() + qq + ".txt", true);
-            streamWriter.WriteLine("我 "+DateTime.Now.ToString("hh:mm:ss") + "=>" + str);
+            streamWriter.WriteLine("我 "+DateTime.Now.ToString("HH:mm:ss") + "=>" + str);
+            //streamWriter.WriteLine("---------------------------------------------------------");
+            streamWriter.Close();
+        }
+
+        public static void WriteZhuanZhangLog(long qq, string str)
+        {
+            StreamWriter streamWriter = new StreamWriter(MySystemUtil.GetDllRoot() + "zhuanzhang.txt", true);
+            streamWriter.WriteLine(qq+"在"+DateTime.Now.ToString() + "发起转账：" + str);
             //streamWriter.WriteLine("---------------------------------------------------------");
             streamWriter.Close();
         }

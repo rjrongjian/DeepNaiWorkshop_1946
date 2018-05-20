@@ -48,7 +48,7 @@ namespace www_52bang_site_enjoy.MyTool
         /// <rturns></returns>
         public static bool JugePlatform(string cqMsg)
         {
-            if(cqMsg.Contains("CQ: rich") || cqMsg.Contains("CQ:rich"))
+            if((cqMsg.Contains("CQ: rich") || cqMsg.Contains("CQ:rich"))&&cqMsg.Contains("url=")&&cqMsg.Contains("text="))
             {
                 return true;
             }
@@ -64,6 +64,8 @@ namespace www_52bang_site_enjoy.MyTool
         /// <returns></returns>
         public static MyResponse<MovieInfo> CovertInSuoIm(string cqMsg)
         {
+            //不做是否是支持的转换平台
+            /*
             bool isContain = false;
             foreach(string canParsePlatform in SystemConfig.CanParsePlatform)
             {
@@ -79,6 +81,7 @@ namespace www_52bang_site_enjoy.MyTool
 
                 return new MyResponse<MovieInfo>(1,null);
             }
+            */
 
             MovieInfo movieInfo = Covert(cqMsg);
             //转成短网址，例用suo.im
@@ -87,6 +90,17 @@ namespace www_52bang_site_enjoy.MyTool
 
             MyResponse<MovieInfo> myResponse = new MyResponse<MovieInfo>(0, movieInfo);
             return myResponse;
+        }
+        /// <summary>
+        /// 将长连接转为短链接
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string CovertUrlInSuoIm(string url)
+        {
+            //转成短网址，例用suo.im
+            string result = MyUrlTool.HttpGet("http://suo.im/api.php?url=" + url, "");
+            return result;
         }
 
 

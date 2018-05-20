@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using www_52bang_site_enjoy;
 
 namespace Plugin_Test
 {
@@ -16,6 +17,11 @@ namespace Plugin_Test
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            MainForm mainForm = new MainForm();
+            mainForm.displayMsg2("测试");
+            mainForm.displayMsg2("测试");
+            mainForm.displayMsg2("测试");
+            mainForm.displayMsg2("测试");
             Application.Run(new Form1());
         }
     }
