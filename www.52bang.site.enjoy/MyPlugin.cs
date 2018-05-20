@@ -70,7 +70,7 @@ namespace www_52bang_site_enjoy.enjoy
                 {
                     //给用户回复的信息日志
                     MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, myResponse.Msg.MovieName + " " + myResponse.Msg.Url);
-                    CoolQApi.SendPrivateMsg(fromQQ,  "主人，这是你的观影地址：" + " " + myResponse.Msg.Url+ "，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                    CoolQApi.SendPrivateMsg(fromQQ,  "主人，这是你的观影地址：" + " " + myResponse.Msg.Url+ "，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，更多好玩的电影跟班，关注微信公众号[电影信封]");
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
                 else
@@ -99,7 +99,7 @@ namespace www_52bang_site_enjoy.enjoy
                         String urlEncode = MyUrlTool.UrlEncode("http://www.52bang.site/dyxf/vip.html?url=http://hao.czybjz.com/20180507/EOxP9Flv/index.m3u8");
                         //复联3
                         String shortUrl = MyLinkCoverter.CovertUrlInSuoIm(urlEncode);
-                        CoolQApi.SendPrivateMsg(fromQQ, "主人，这是你的观影地址，"+ shortUrl+"，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
+                        CoolQApi.SendPrivateMsg(fromQQ, "主人，这是你的观影地址，"+ shortUrl+"，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
                         MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，这是你的观影地址，" + shortUrl + "，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
