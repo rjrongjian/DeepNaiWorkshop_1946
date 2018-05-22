@@ -37,5 +37,13 @@ namespace www_52bang_site_enjoy.MyTool
             //streamWriter.WriteLine("---------------------------------------------------------");
             streamWriter.Close();
         }
+
+        public static void ErrToLog(long qq,string str)
+        {
+            StreamWriter streamWriter = new StreamWriter(MySystemUtil.GetDllRoot() + "errLog.txt", true);
+            streamWriter.WriteLine(DateTime.Now.ToString() + "=>" + str);
+            streamWriter.WriteLine("---------------------------------------------------------");
+            streamWriter.Close();
+        }
     }
 }

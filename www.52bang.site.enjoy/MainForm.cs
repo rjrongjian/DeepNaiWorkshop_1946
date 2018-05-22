@@ -55,6 +55,10 @@ namespace www_52bang_site_enjoy
 
         public void displayMsg2(string msg)
         {
+            if (listBox1.Items.Count > 100)
+            {
+                listBox1.Items.Clear();
+            }
             this.listBox1.Items.Add(msg);
         }
         //发送私人信息

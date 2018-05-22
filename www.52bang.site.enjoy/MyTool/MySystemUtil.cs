@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DeepNaiWorkshop_6001.MyTool;
+using FileCreator.MyTool;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using www_52bang_site_enjoy.MyModel;
 
 namespace www_52bang_site_enjoy.MyTool
 {
@@ -59,7 +62,69 @@ namespace www_52bang_site_enjoy.MyTool
             return dirPath;
 
         }
+        /// <summary>
+        /// 获取会员文件存放目录
+        /// </summary>
+        /// <returns></returns>
+        public static string GetMemberPath()
+        {
+            string dirPath = GetDllRoot() + @"Member\";
+            if (!Directory.Exists(dirPath))
+            {
+                Directory.CreateDirectory(dirPath);
+            }
 
-        
+            return dirPath;
+        }
+
+        /// <summary>
+        /// 获取本地配置文件
+        /// </summary>
+        /// <returns></returns>
+        public static SystemConfigJson GetSystemConfigJson()
+        {
+            try
+            {
+                if (!File.Exists(GetSystemConfigJsonPath()))
+                {
+                    return null;
+                }
+                else
+                {
+                    MyJsonUtil<SystemConfigJson> myJsonUtil = new MyJsonUtil<SystemConfigJson>();
+                    string content = MyFileUtil.readFileAll(GetSystemConfigJsonPath());
+                    SystemConfigJson systemConfigJson = myJsonUtil.parseJsonStr(content);
+                    return systemConfigJson;
+                }
+
+            }catch(Exception e)
+            {
+                
+                return null;
+            }
+            
+            
+        }
+
+        /// <summary>
+        /// 获取配置文件的目录
+        /// </summary>
+        /// <returns></returns>
+        public static string GetSystemConfigJsonPath()
+        {
+            string dirPath = GetDllRoot() + "SystemConfig.txt";
+            return dirPath;
+        }
+        /// <summary>
+        /// 获取会员文件完整路径
+        /// </summary>
+        /// <param name="qq"></param>
+        /// <returns></returns>
+        public static string GetMemberPath(long qq)
+        {
+            return GetMemberPath() + qq + ".txt";
+        }
+
+
     }
 }

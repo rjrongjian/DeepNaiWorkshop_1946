@@ -39,6 +39,9 @@
     <Reference Include="Newbe.CQP.Framework, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Newbe.CQP.Framework.1.2.0\lib\net452\Newbe.CQP.Framework.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -58,16 +61,24 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MyModel\Member.cs" />
     <Compile Include="MyModel\MovieInfo.cs" />
     <Compile Include="MyModel\MyResponse.cs" />
     <Compile Include="MyModel\PlatformInfo.cs" />
+    <Compile Include="MyModel\ResourceInfo.cs" />
     <Compile Include="MyModel\SystemConfig.cs" />
+    <Compile Include="MyModel\SystemConfigJson.cs" />
     <Compile Include="MyPlugin.cs" />
+    <Compile Include="MyTool\MyDateUtil.cs" />
+    <Compile Include="MyTool\MyFileUtil.cs" />
+    <Compile Include="MyTool\MyJsonUtil.cs" />
     <Compile Include="MyTool\MyLinkCoverter.cs" />
     <Compile Include="MyTool\MyLogUtil.cs" />
+    <Compile Include="MyTool\MyMemoryUtil.cs" />
     <Compile Include="MyTool\MySystemUtil.cs" />
     <Compile Include="MyTool\MyUrlTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\MemberService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Newbe.CQP.Framework.props" />

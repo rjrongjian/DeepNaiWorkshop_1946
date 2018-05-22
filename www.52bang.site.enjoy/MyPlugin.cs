@@ -10,18 +10,33 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using www_52bang_site_enjoy.MyModel;
 using www_52bang_site_enjoy.MyTool;
+using www_52bang_site_enjoy.Service;
 
 namespace www_52bang_site_enjoy.enjoy
 {
     public class MyPlugin: PluginBase
     {
         private MainForm mainForm;
+        private SystemConfigJson systemConfigJson;
         
         public MyPlugin(ICoolQApi coolQApi) : base(coolQApi)
         {
-            mainForm = new MainForm();
-            mainForm.Show();
-            mainForm.setCoolQApi(CoolQApi);
+            
+
+            //获取本地配置
+            systemConfigJson = MySystemUtil.GetSystemConfigJson();
+            if (systemConfigJson == null)
+            {
+
+                MessageBox.Show("不能加载"+ MySystemUtil.GetSystemConfigJsonPath()+",请重启");//程序即将退出
+
+            }
+            else
+            {
+                mainForm = new MainForm();
+                mainForm.Show();
+                mainForm.setCoolQApi(CoolQApi);
+            }
         }
         /// <summary>
         /// AppId需要与程序集名称相同
@@ -38,93 +53,229 @@ namespace www_52bang_site_enjoy.enjoy
         /// <returns></returns>
         public override int ProcessPrivateMessage(int subType, int sendTime, long fromQQ, string msg, int font)
         {
-            mainForm.displayMsg2("处理私聊消息：" + subType + "," + sendTime + "," + msg+","+font);
+            try { 
+                mainForm.displayMsg2("处理私聊消息：" + subType + "," + sendTime + "," + msg+","+font);
+                MemberService memberService = new MemberService();
 
+                //用户发来的消息日志
+                MyLogUtil.WriteQQDialogueLog(fromQQ, msg);
+                //获取的消息
+                mainForm.displayMsg(msg);
 
-            //用户发来的消息日志
-            MyLogUtil.WriteQQDialogueLog(fromQQ, msg);
-            //获取的消息
-            mainForm.displayMsg(msg);
+                /*
+                 * [CQ:rich,url=https://v.youku.com/v_show/id_XMzU5NDQzNzIxNg==.html?sharefrom=iphone,text=极限挑战 第四季20180510 会员解读版第2期:演技滑铁卢!内含男人帮最想删的片段 ]
+                 */
 
-            /*
-             * [CQ:rich,url=https://v.youku.com/v_show/id_XMzU5NDQzNzIxNg==.html?sharefrom=iphone,text=极限挑战 第四季20180510 会员解读版第2期:演技滑铁卢!内含男人帮最想删的片段 ]
-             */
-
-            //说明用户回复的是指定的关键词
-            Hashtable keywords = SystemConfig.keywords;
-            string keywordsValue = (string)keywords[msg];
-            if (!string.IsNullOrWhiteSpace(keywordsValue))
-            {
-                //给用户回复的信息日志
-                MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, keywordsValue);
-                //发送消息
-                CoolQApi.SendPrivateMsg(fromQQ, keywordsValue);
-                return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
-            }
-
-            //判断是否是指定的视频平台链接
-            if (MyLinkCoverter.JugePlatform(msg))
-            {
-                MyResponse<MovieInfo> myResponse = MyLinkCoverter.CovertInSuoIm(msg);
-                if (myResponse.Code == 0)//获取成功了
+                //说明用户回复的是指定的关键词
+                Hashtable keywords = SystemConfig.keywords;
+                string keywordsValue = (string)keywords[msg];
+                if (!string.IsNullOrWhiteSpace(keywordsValue))
                 {
                     //给用户回复的信息日志
-                    MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, myResponse.Msg.MovieName + " " + myResponse.Msg.Url);
-                    CoolQApi.SendPrivateMsg(fromQQ,  "主人，这是你的观影地址：" + " " + myResponse.Msg.Url+ "，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                    MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, keywordsValue);
+                    //发送消息
+                    CoolQApi.SendPrivateMsg(fromQQ, keywordsValue);
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
-                else
+
+                //判断是否是指定的视频平台链接
+                if (MyLinkCoverter.JugePlatform(msg))
                 {
-                    //给用户回复的信息日志
-                    MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, SystemConfig.NoConvertPlatform);
-                    CoolQApi.SendPrivateMsg(fromQQ,SystemConfig.NoConvertPlatform);
-                    return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
-                }
-                
-            }
-            //判断是否收到转账
-            if (!string.IsNullOrWhiteSpace(msg) && msg.Contains("&#91;转账&#93;") && (msg.Contains("元已转账成功，请使用手机QQ查看。") || msg.Contains("元转账需收款，请使用手机QQ查看。")))
-            {
-                try {
-                    string value = msg.Replace("&#91;转账&#93;", "");
-                    value = value.Replace("元已转账成功，请使用手机QQ查看。", "");
-                    value = value.Replace("元转账需收款，请使用手机QQ查看。", "");
-                    value = value.Trim();
-                    
-                    double money = Convert.ToDouble(value);
-                    mainForm.displayMsg2("看看金额：" + (money >= 1));
-                    if (money >= 1)
-                    //if(money>0)
+                    MyResponse<MovieInfo> myResponse = MyLinkCoverter.CovertInSuoIm(msg);
+                    if (myResponse.Code == 0)//获取成功了
                     {
-                        String urlEncode = MyUrlTool.UrlEncode("http://www.52bang.site/dyxf/vip.html?url=http://hao.czybjz.com/20180507/EOxP9Flv/index.m3u8");
-                        //复联3
-                        String shortUrl = MyLinkCoverter.CovertUrlInSuoIm(urlEncode);
-                        CoolQApi.SendPrivateMsg(fromQQ, "主人，这是你的观影地址，"+ shortUrl+"，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
-                        MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，这是你的观影地址，" + shortUrl + "，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
+                        //给用户回复的信息日志
+                        MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, myResponse.Msg.MovieName + " " + myResponse.Msg.Url);
+                        CoolQApi.SendPrivateMsg(fromQQ,  "主人，这是你的观影地址：" + " " + myResponse.Msg.Url+ "，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，更多好玩的电影跟班，关注微信公众号[电影信封]");
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
                     else
                     {
-                        MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户转账额度不足，"+ money);
-                        MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "用户转账额度不足，" + money);
-                        CoolQApi.SendPrivateMsg(fromQQ, "主人，你转账的金额不足，1天后会自动退还，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                        //给用户回复的信息日志
+                        MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, SystemConfig.NoConvertPlatform);
+                        CoolQApi.SendPrivateMsg(fromQQ,SystemConfig.NoConvertPlatform);
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
-                }catch(Exception e)
+                
+                }
+                //判断是否收到转账
+                //充值会员
+                if (!string.IsNullOrWhiteSpace(msg) && msg.Contains("&#91;转账&#93;") && (msg.Contains("元已转账成功，请使用手机QQ查看。") || msg.Contains("元转账需收款，请使用手机QQ查看。")))
                 {
-                    //解析转账出现问题
+                    try {
+                        string value = msg.Replace("&#91;转账&#93;", "");
+                        value = value.Replace("元已转账成功，请使用手机QQ查看。", "");
+                        value = value.Replace("元转账需收款，请使用手机QQ查看。", "");
+                        value = value.Trim();
+                    
+                        double money = Convert.ToDouble(value);
+                        if (money == 3||money==10)
+                        {
+                            /*
+                            String urlEncode = MyUrlTool.UrlEncode("http://www.52bang.site/dyxf/parse.html?url=http://hao.czybjz.com/20180507/EOxP9Flv/index.m3u8");
+                            //复联3
+                            String shortUrl = MyLinkCoverter.CovertUrlInSuoIm(urlEncode);
+                            CoolQApi.SendPrivateMsg(fromQQ, "主人，这是你的观影地址，"+ shortUrl+"，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
+                            MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，这是你的观影地址，" + shortUrl + "，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
+                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                            */
+                        
+                            Member member = memberService.Recharge(money,fromQQ);
 
-                    MyLogUtil.WriteZhuanZhangLog(fromQQ, "转账失败"+e);
-                    MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，不好意思，我现在生病啦，不能为你提供资源链接，转账金额1天后自动退还，更多好玩的电影跟班，关注微信公众号[电影信封]");
-                    CoolQApi.SendPrivateMsg(fromQQ, "主人，不好意思，我现在生病啦，不能为你提供资源链接，转账金额1天后自动退还，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                            MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户充值" + money);
+                            CoolQApi.SendPrivateMsg(fromQQ, "充值成功，会员到期时间："+member.DateDesp+"，QQ回复“会员”，查看会员到期日");
+                            MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "充值成功，会员到期时间：" + member.DateDesp + "，QQ回复“会员”，查看会员到期日");
+                            CoolQApi.SendPrivateMsg(fromQQ, "QQ回复“资源”或微信关注[电影信封]，获得观看会员资源");
+                            MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "QQ回复“资源”或微信关注[电影信封]，获得观看会员资源");
+                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                        }
+                        else
+                        {
+                            MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户转账额度不符合，"+ money);
+                            MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "用户转账额度不符合，" + money);
+                            CoolQApi.SendPrivateMsg(fromQQ, "主人，目前只支持3、10元的充值金额，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                        }
+                    }catch(Exception e)
+                    {
+                        //解析转账出现问题
+                        MyLogUtil.ErrToLog(fromQQ, "转账失败，原因：" + e);
+
+                        MyLogUtil.WriteZhuanZhangLog(fromQQ, "转账失败"+e);
+                        MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，不好意思，我现在生病啦，不能为你提供资源链接，转账金额1天后自动退还，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                        CoolQApi.SendPrivateMsg(fromQQ, "主人，不好意思，我现在生病啦，不能为你提供资源链接，转账金额1天后自动退还，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                        return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                    }
+
+                }
+                //会员到期日
+                if ("会员".Equals(msg))
+                {
+                    Member member = memberService.GetMemberDate(fromQQ);
+                    if (member.Type == 3)// 1不是会员 2 会员过期 3 正常会员
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "会员过期时间："+member.DateDesp);
+                        CoolQApi.SendPrivateMsg(fromQQ, "会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                    }
+                    else if(member.Type == 2)
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，"+member.DateDesp+"，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                    }
+                    else
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                    }
+                    return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                }
+                //资源列表
+                if ("资源".Equals(msg))
+                {
+                    //付费电影资源列表
+                    CoolQApi.SendPrivateMsg(fromQQ,"查看所有资源资源码："+systemConfigJson.ResourceUrl);
+                    return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+
+                }
+
+                //解析分享过来的是不是指定平台的链接(拦截形如xxxhttp://www.baidu.comxxx,但是有些新闻也是这种格式的)
+                MyResponse<string> sharedUrl = null;
+                sharedUrl = MyLinkCoverter.ParsePlatform(msg);
+                if (sharedUrl.Code == 0)//正常链接
+                {
+                    sharedUrl.Msg = MyLinkCoverter.CovertUrlInSuoIm(sharedUrl.Msg, true);
+                    //给用户回复的信息日志
+                    MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，这是你的观影地址：" + " " + sharedUrl.Msg + "，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                    CoolQApi.SendPrivateMsg(fromQQ, "主人，这是你的观影地址：" + " " + sharedUrl.Msg + "，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                    CoolQApi.SendPrivateMsg(fromQQ, "请确保发送给我的是主流视频平台的http或https链接，不要带其他信息，否则不能正常观看呦");
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
 
+                //付费资源KeyNotFoundException
+                //目前资源识别是4位数字
+                ResourceInfo resourceInfo = null;
+                try
+                {
+                    resourceInfo = (ResourceInfo)systemConfigJson.ResourceKl[msg];
+                }
+                catch (KeyNotFoundException ke)
+                {
+                    resourceInfo = null;
+
+                }
+
+                if (resourceInfo != null)
+                {
+                    Member member = memberService.GetMemberDate(fromQQ);
+                    if (member.Type == 3)// 1不是会员 2 会员过期 3 正常会员
+                    {
+                        String url = "";
+                        try { 
+                            if (resourceInfo.Type == 2)////资源类型 1 链接直接使用 2 需使用优酷转vip的接口
+                            {
+                                url = SystemConfig.ResourceApi+resourceInfo.Url;
+                            }
+                            else
+                            {
+                                url = resourceInfo.Url;
+                            }
+                            url = MyLinkCoverter.CovertUrlInSuoIm(url);
+                            CoolQApi.SendPrivateMsg(fromQQ, "《"+resourceInfo.Name+"》"+" "+MyLinkCoverter.CovertUrlInSuoIm(resourceInfo.Url));
+                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+
+                        }
+                        catch(Exception e2)
+                        {
+                            CoolQApi.SendPrivateMsg(fromQQ, "小喵出现问题，请过会再来尝试");
+                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                        }
+                    
+                    }
+                    else if (member.Type == 2)
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                        return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                    }
+                    else
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                        return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                    }
+                }
+                else
+                {
+
+                    //查看信息是否是4位数字
+                    try
+                    {
+                        if (msg.Length == 4)
+                        {
+                            //如果是四位数字
+                            int kl = Convert.ToInt32(msg);
+                            CoolQApi.SendPrivateMsg(fromQQ, "此口令资源不存在，更多资源电影码：" + systemConfigJson.ResourceUrl);
+                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                        }
+                        
+                        
+                        
+                    }
+                    catch (Exception e)//如果是4位非数字
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "此口令资源不存在，更多资源电影码：" + systemConfigJson.ResourceUrl);
+                        return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                    }
+                    
+                }
+
+                //以上所有资源都不匹配
+
+                //
+
+                return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
             }
-            //收到转账时消息体
-            //&#91;转账&#93; 0.01元转账需收款，请使用手机QQ查看。
-            //红包没有消息
-            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+            catch(Exception e)
+            {
+                MyLogUtil.ErrToLog(fromQQ, "发生不被期待的异常："+e);
+                return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+            }
         }
 
         /// <summary>
@@ -282,7 +433,8 @@ namespace www_52bang_site_enjoy.enjoy
             mainForm.displayMsg2("处理加群请求：" + subType + "," + sendTime + "," + fromGroup + "," + fromQq + ","+msg+"," + responseMark);
 
             //自动加群处理
-            CoolQApi.SetGroupAddRequest(responseMark, CoolQAddGroupRequestType.Normal, CoolQRequestResult.Allow);//请求通过
+            //TODO 暂时屏蔽
+            //CoolQApi.SetGroupAddRequest(responseMark, CoolQAddGroupRequestType.Normal, CoolQRequestResult.Allow);//请求通过
             mainForm.displayMsg2("---发起自动加群处理SetGroupAddRequest：" + responseMark + "," + CoolQAddGroupRequestType.Normal + "," + CoolQRequestResult.Allow);
 
             return base.ProcessJoinGroupRequest(subType, sendTime, fromGroup, fromQq, msg, responseMark);

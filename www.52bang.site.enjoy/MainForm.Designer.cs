@@ -234,7 +234,7 @@
             this.textBox1.Location = new System.Drawing.Point(29, 40);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(567, 476);
+            this.textBox1.Size = new System.Drawing.Size(567, 416);
             this.textBox1.TabIndex = 0;
             // 
             // tabPage2
@@ -254,7 +254,7 @@
             this.listBox1.ItemHeight = 12;
             this.listBox1.Location = new System.Drawing.Point(19, 20);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(587, 508);
+            this.listBox1.Size = new System.Drawing.Size(587, 424);
             this.listBox1.TabIndex = 0;
             // 
             // tabPage3
