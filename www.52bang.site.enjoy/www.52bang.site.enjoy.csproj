@@ -55,12 +55,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HttpCode\HttpCode.cs" />
+    <Compile Include="HttpCode\HttpItems.cs" />
+    <Compile Include="HttpCode\HttpResults.cs" />
+    <Compile Include="HttpCode\OtherHelper.cs" />
+    <Compile Include="HttpCode\XJHTTP.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MyModel\GroupInfo.cs" />
+    <Compile Include="MyModel\KunyunInfo.cs" />
     <Compile Include="MyModel\Member.cs" />
     <Compile Include="MyModel\MovieInfo.cs" />
     <Compile Include="MyModel\MyResponse.cs" />
@@ -69,6 +76,8 @@
     <Compile Include="MyModel\SystemConfig.cs" />
     <Compile Include="MyModel\SystemConfigJson.cs" />
     <Compile Include="MyPlugin.cs" />
+    <Compile Include="MyTool\CoolQApiExtend.cs" />
+    <Compile Include="MyTool\KuYunSearch.cs" />
     <Compile Include="MyTool\MyDateUtil.cs" />
     <Compile Include="MyTool\MyFileUtil.cs" />
     <Compile Include="MyTool\MyJsonUtil.cs" />

@@ -78,6 +78,86 @@ namespace www_52bang_site_enjoy.enjoy
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
 
+                //判断用户是否是想搜取
+                if (msg.StartsWith("搜"))
+                {
+                    Member member = memberService.GetMemberDate(fromQQ);
+                    if (member.Type == 3)// 1不是会员 2 会员过期 3 正常会员
+                    {
+                        String url = "";
+                        try
+                        {
+                            string searchContent = msg.Substring(1);
+                            if (string.IsNullOrWhiteSpace(searchContent))
+                            {
+                                CoolQApi.SendPrivateMsg(fromQQ, "请输入要搜索的内容，例如：搜黑豹");
+                                return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                            }
+                            else
+                            {
+                                CoolQApi.SendPrivateMsg(fromQQ, "正在寻找资源，请稍等...");
+                                List<KunyunInfo> list = KuYunSearch.Search(searchContent);
+                                if (list == null || list.Count == 0)
+                                {
+                                    CoolQApi.SendPrivateMsg(fromQQ, "暂时未找到此资源");
+                                    return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                                }
+                                else if (list.Count == 1)//说明找到了具体电影的链接
+                                {
+
+                                    StringBuilder sb = new StringBuilder("我找到了以下资源（电影含多个链接对应不同清晰度，电视剧不同集）：");
+                                    foreach(KunyunInfo k in list)
+                                    {
+                                        sb.Append("《" + k.name + "》 ");
+                                        foreach(string res in k.url)
+                                        {
+                                            if (k.resourceTYpe == 1)//m3u8
+                                            {
+                                                sb.Append( MyLinkCoverter.CovertUrlInSuoIm(res, true) + " ");
+                                            }
+                                            else//直接观看链接
+                                            {
+                                                sb.Append(MyLinkCoverter.CovertUrlInSuoIm(res, false)+" ");
+                                            }
+                                            
+                                        }
+                                    }
+
+                                    CoolQApi.SendPrivateMsg(fromQQ, sb.ToString());
+                                    return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                                }
+                                else//说明找到了相关的好几个电影
+                                {
+                                    StringBuilder sb = new StringBuilder("我找到了多个相关资源，请聊天回复以下具体某个资源获取观影链接： \r\n");
+                                    foreach(KunyunInfo k in list)
+                                    {
+                                        sb.Append("搜" + k.name+" \r\n");
+                                    }
+                                    CoolQApi.SendPrivateMsg(fromQQ, sb.ToString());
+                                    return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                                }
+                            }
+
+                        }
+                        catch (Exception e2)
+                        {
+                            CoolQApi.SendPrivateMsg(fromQQ, "小喵出现问题，请过会再来尝试");
+                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                        }
+
+                    }
+                    else if (member.Type == 2)
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，会员价格："+SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
+                        return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                    }
+                    else
+                    {
+                        CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
+                        return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
+                    }
+                }
+
                 //判断是否是指定的视频平台链接
                 if (MyLinkCoverter.JugePlatform(msg))
                 {
@@ -109,17 +189,8 @@ namespace www_52bang_site_enjoy.enjoy
                         value = value.Trim();
                     
                         double money = Convert.ToDouble(value);
-                        if (money == 3||money==10)
+                        if (money == SystemConfig.MoneyForWeekPay||money== SystemConfig.MoneyForMonthPay)
                         {
-                            /*
-                            String urlEncode = MyUrlTool.UrlEncode("http://www.52bang.site/dyxf/parse.html?url=http://hao.czybjz.com/20180507/EOxP9Flv/index.m3u8");
-                            //复联3
-                            String shortUrl = MyLinkCoverter.CovertUrlInSuoIm(urlEncode);
-                            CoolQApi.SendPrivateMsg(fromQQ, "主人，这是你的观影地址，"+ shortUrl+"，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
-                            MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，这是你的观影地址，" + shortUrl + "，感谢支持！更多好玩的电影跟班，关注微信公众号[电影信封]");
-                            return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
-                            */
-                        
                             Member member = memberService.Recharge(money,fromQQ);
 
                             MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户充值" + money);
@@ -133,7 +204,7 @@ namespace www_52bang_site_enjoy.enjoy
                         {
                             MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户转账额度不符合，"+ money);
                             MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "用户转账额度不符合，" + money);
-                            CoolQApi.SendPrivateMsg(fromQQ, "主人，目前只支持3、10元的充值金额，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                            CoolQApi.SendPrivateMsg(fromQQ, "主人，目前只支持"+SystemConfig.MoneyForWeekPay+"、"+ SystemConfig.MoneyForMonthPay + "元的充值金额，更多好玩的电影跟班，关注微信公众号[电影信封]");
                             return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                         }
                     }catch(Exception e)
@@ -155,15 +226,15 @@ namespace www_52bang_site_enjoy.enjoy
                     if (member.Type == 3)// 1不是会员 2 会员过期 3 正常会员
                     {
                         CoolQApi.SendPrivateMsg(fromQQ, "会员过期时间："+member.DateDesp);
-                        CoolQApi.SendPrivateMsg(fromQQ, "会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
                     }
                     else if(member.Type == 2)
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，"+member.DateDesp+"，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，"+member.DateDesp+ "，会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
                     }
                     else
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
                     }
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
@@ -171,7 +242,9 @@ namespace www_52bang_site_enjoy.enjoy
                 if ("资源".Equals(msg))
                 {
                     //付费电影资源列表
+                    
                     CoolQApi.SendPrivateMsg(fromQQ,"查看所有资源资源码："+systemConfigJson.ResourceUrl);
+                    CoolQApi.SendPrivateMsg(fromQQ, "也可以搜索指定电影哦，命令：搜+电影名，举例：搜黑豹");
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
 
                 }
@@ -231,12 +304,12 @@ namespace www_52bang_site_enjoy.enjoy
                     }
                     else if (member.Type == 2)
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
                     else
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：3元-7天，10元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
                 }

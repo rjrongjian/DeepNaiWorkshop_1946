@@ -24,6 +24,10 @@ namespace www_52bang_site_enjoy.MyModel
         public static string MsgWhenFriendsAdded = "主人，将优酷、腾讯、爱奇艺等vip视频分享给我，可直接观看哦！！"+CoolQCode.Expression(62)+ CoolQCode.Expression(14);
         //分享的视频链接不能被转换
         public static string NoConvertPlatform = "不支持该链接转换";
+
+        public static int MoneyForWeekPay = 4;//7天价格
+        public static int MoneyForMonthPay = 15;//30天价格
+
         static SystemConfig(){
 
             keywords.Add("谢谢", "不客气");

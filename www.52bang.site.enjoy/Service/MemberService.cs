@@ -1,11 +1,7 @@
 ﻿using DeepNaiWorkshop_6001.MyTool;
 using FileCreator.MyTool;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using www_52bang_site_enjoy.MyModel;
 using www_52bang_site_enjoy.MyTool;
 
@@ -55,11 +51,11 @@ namespace www_52bang_site_enjoy.Service
 
         private long AddTime(double money)
         {
-            if (money == 3)
+            if (money == SystemConfig.MoneyForWeekPay)
             {
                 return 7L * 24 * 60 * 60 * 1000;
             }
-            else if(money == 10)
+            else if(money == SystemConfig.MoneyForMonthPay)
             {
                 return 30L * 24 * 60 * 60 * 1000;
             }
