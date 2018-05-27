@@ -113,11 +113,11 @@ namespace www_52bang_site_enjoy.enjoy
                                         {
                                             if (k.resourceTYpe == 1)//m3u8
                                             {
-                                                sb.Append( MyLinkCoverter.CovertUrlInSuoIm(res, true) + " ");
+                                                sb.Append( MyLinkCoverter.CovertUrlInSuoIm(res, true) + " \r\n");
                                             }
                                             else//直接观看链接
                                             {
-                                                sb.Append(MyLinkCoverter.CovertUrlInSuoIm(res, false)+" ");
+                                                sb.Append(MyLinkCoverter.CovertUrlInSuoIm(res, false)+" \r\n");
                                             }
                                             
                                         }
@@ -196,8 +196,8 @@ namespace www_52bang_site_enjoy.enjoy
                             MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户充值" + money);
                             CoolQApi.SendPrivateMsg(fromQQ, "充值成功，会员到期时间："+member.DateDesp+"，QQ回复“会员”，查看会员到期日");
                             MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "充值成功，会员到期时间：" + member.DateDesp + "，QQ回复“会员”，查看会员到期日");
-                            CoolQApi.SendPrivateMsg(fromQQ, "QQ回复“资源”或微信关注[电影信封]，获得观看会员资源");
-                            MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "QQ回复“资源”或微信关注[电影信封]，获得观看会员资源");
+                            CoolQApi.SendPrivateMsg(fromQQ, "QQ回复“会员”或微信关注[电影信封]，获得观看会员资源");
+                            MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "QQ回复“会员”或微信关注[电影信封]，获得观看会员资源");
                             return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                         }
                         else
@@ -225,8 +225,8 @@ namespace www_52bang_site_enjoy.enjoy
                     Member member = memberService.GetMemberDate(fromQQ);
                     if (member.Type == 3)// 1不是会员 2 会员过期 3 正常会员
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "会员过期时间："+member.DateDesp);
-                        CoolQApi.SendPrivateMsg(fromQQ, "会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "会员过期时间："+member.DateDesp+ " \r\n常见命令："+ systemConfigJson.Command);
+                        CoolQApi.SendPrivateMsg(fromQQ, "会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包,不支持其他金额）");
                     }
                     else if(member.Type == 2)
                     {
@@ -235,6 +235,7 @@ namespace www_52bang_site_enjoy.enjoy
                     else
                     {
                         CoolQApi.SendPrivateMsg(fromQQ, "你还不是会员，会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "会员常见命令：" + systemConfigJson.Command);
                     }
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                 }
@@ -444,7 +445,7 @@ namespace www_52bang_site_enjoy.enjoy
         public override int ProcessGroupMemberIncrease(int subType, int sendTime, long fromGroup, long fromQq, long target)
         {
             mainForm.displayMsg2("处理群成员添加事件：" + subType + "," + sendTime + "," + fromGroup + "," + fromQq + "," + target);
-
+            /*
             //成员添加后，进行@用户，外加欢迎与
             if (subType == 1)//账号为管理员，同意群员入群后触发
             {
@@ -456,6 +457,7 @@ namespace www_52bang_site_enjoy.enjoy
                 CoolQApi.SendGroupMsg(fromGroup, CoolQCode.At(fromQq)+"邀请"+ CoolQCode.At(target) + "加入我们的大家庭，热烈欢迎");
                 mainForm.displayMsg2("---给用户发送欢迎语：" + CoolQCode.At(fromQq) + "邀请" + CoolQCode.At(target) + "加入我们的大家庭，热烈欢迎");
             }
+            */
 
             return base.ProcessGroupMemberIncrease(subType, sendTime, fromGroup, fromQq, target);
         }
