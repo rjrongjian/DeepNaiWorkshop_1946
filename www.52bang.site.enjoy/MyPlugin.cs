@@ -63,10 +63,6 @@ namespace www_52bang_site_enjoy.enjoy
                 //获取的消息
                 mainForm.displayMsg(msg);
 
-                /*
-                 * [CQ:rich,url=https://v.youku.com/v_show/id_XMzU5NDQzNzIxNg==.html?sharefrom=iphone,text=极限挑战 第四季20180510 会员解读版第2期:演技滑铁卢!内含男人帮最想删的片段 ]
-                 */
-
                 //说明用户回复的是指定的关键词
                 Hashtable keywords = SystemConfig.keywords;
                 string keywordsValue = (string)keywords[msg];
