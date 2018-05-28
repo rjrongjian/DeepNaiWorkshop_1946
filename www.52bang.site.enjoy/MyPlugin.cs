@@ -14,21 +14,21 @@ using www_52bang_site_enjoy.Service;
 
 namespace www_52bang_site_enjoy.enjoy
 {
-    public class MyPlugin: PluginBase
+    public class MyPlugin : PluginBase
     {
         private MainForm mainForm;
         private SystemConfigJson systemConfigJson;
-        
+
         public MyPlugin(ICoolQApi coolQApi) : base(coolQApi)
         {
-            
+
 
             //获取本地配置
             systemConfigJson = MySystemUtil.GetSystemConfigJson();
             if (systemConfigJson == null)
             {
 
-                MessageBox.Show("不能加载"+ MySystemUtil.GetSystemConfigJsonPath()+",请重启");//程序即将退出
+                MessageBox.Show("不能加载" + MySystemUtil.GetSystemConfigJsonPath() + ",请重启");//程序即将退出
 
             }
             else
@@ -53,8 +53,9 @@ namespace www_52bang_site_enjoy.enjoy
         /// <returns></returns>
         public override int ProcessPrivateMessage(int subType, int sendTime, long fromQQ, string msg, int font)
         {
-            try { 
-                mainForm.displayMsg2("处理私聊消息：" + subType + "," + sendTime + "," + msg+","+font);
+            try
+            {
+                mainForm.displayMsg2("处理私聊消息：" + subType + "," + sendTime + "," + msg + "," + font);
                 MemberService memberService = new MemberService();
 
                 //用户发来的消息日志
@@ -106,20 +107,20 @@ namespace www_52bang_site_enjoy.enjoy
                                 {
 
                                     StringBuilder sb = new StringBuilder("我找到了以下资源（电影含多个链接对应不同清晰度，电视剧不同集）：");
-                                    foreach(KunyunInfo k in list)
+                                    foreach (KunyunInfo k in list)
                                     {
                                         sb.Append("《" + k.name + "》 ");
-                                        foreach(string res in k.url)
+                                        foreach (string res in k.url)
                                         {
                                             if (k.resourceTYpe == 1)//m3u8
                                             {
-                                                sb.Append( MyLinkCoverter.CovertUrlInSuoIm(res, true) + " \r\n");
+                                                sb.Append(MyLinkCoverter.CovertUrlInSuoIm(res, true) + " \r\n");
                                             }
                                             else//直接观看链接
                                             {
-                                                sb.Append(MyLinkCoverter.CovertUrlInSuoIm(res, false)+" \r\n");
+                                                sb.Append(MyLinkCoverter.CovertUrlInSuoIm(res, false) + " \r\n");
                                             }
-                                            
+
                                         }
                                     }
 
@@ -129,9 +130,9 @@ namespace www_52bang_site_enjoy.enjoy
                                 else//说明找到了相关的好几个电影
                                 {
                                     StringBuilder sb = new StringBuilder("我找到了多个相关资源，请聊天回复以下具体某个资源获取观影链接： \r\n");
-                                    foreach(KunyunInfo k in list)
+                                    foreach (KunyunInfo k in list)
                                     {
-                                        sb.Append("搜" + k.name+" \r\n");
+                                        sb.Append("搜" + k.name + " \r\n");
                                     }
                                     CoolQApi.SendPrivateMsg(fromQQ, sb.ToString());
                                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
@@ -148,7 +149,7 @@ namespace www_52bang_site_enjoy.enjoy
                     }
                     else if (member.Type == 2)
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，会员价格："+SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
                     else
@@ -166,35 +167,36 @@ namespace www_52bang_site_enjoy.enjoy
                     {
                         //给用户回复的信息日志
                         MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, myResponse.Msg.MovieName + " " + myResponse.Msg.Url);
-                        CoolQApi.SendPrivateMsg(fromQQ,  "主人，这是你的观影地址：" + " " + myResponse.Msg.Url+ "，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                        CoolQApi.SendPrivateMsg(fromQQ, "主人，这是你的观影地址：" + " " + myResponse.Msg.Url + "，由于需要加载影片，请耐心等待，如果不能播放，请刷新或换浏览器，更多好玩的电影跟班，关注微信公众号[电影信封]");
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
                     else
                     {
                         //给用户回复的信息日志
                         MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, SystemConfig.NoConvertPlatform);
-                        CoolQApi.SendPrivateMsg(fromQQ,SystemConfig.NoConvertPlatform);
+                        CoolQApi.SendPrivateMsg(fromQQ, SystemConfig.NoConvertPlatform);
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
-                
+
                 }
                 //判断是否收到转账
                 //充值会员
                 if (!string.IsNullOrWhiteSpace(msg) && msg.Contains("&#91;转账&#93;") && (msg.Contains("元已转账成功，请使用手机QQ查看。") || msg.Contains("元转账需收款，请使用手机QQ查看。")))
                 {
-                    try {
+                    try
+                    {
                         string value = msg.Replace("&#91;转账&#93;", "");
                         value = value.Replace("元已转账成功，请使用手机QQ查看。", "");
                         value = value.Replace("元转账需收款，请使用手机QQ查看。", "");
                         value = value.Trim();
-                    
+
                         double money = Convert.ToDouble(value);
-                        if (money == SystemConfig.MoneyForWeekPay||money== SystemConfig.MoneyForMonthPay)
+                        if (money == SystemConfig.MoneyForWeekPay || money == SystemConfig.MoneyForMonthPay)
                         {
-                            Member member = memberService.Recharge(money,fromQQ);
+                            Member member = memberService.Recharge(money, fromQQ);
 
                             MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户充值" + money);
-                            CoolQApi.SendPrivateMsg(fromQQ, "充值成功，会员到期时间："+member.DateDesp+"，QQ回复“会员”，查看会员到期日");
+                            CoolQApi.SendPrivateMsg(fromQQ, "充值成功，会员到期时间：" + member.DateDesp + "，QQ回复“会员”，查看会员到期日");
                             MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "充值成功，会员到期时间：" + member.DateDesp + "，QQ回复“会员”，查看会员到期日");
                             CoolQApi.SendPrivateMsg(fromQQ, "QQ回复“会员”或微信关注[电影信封]，获得观看会员资源");
                             MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "QQ回复“会员”或微信关注[电影信封]，获得观看会员资源");
@@ -202,17 +204,18 @@ namespace www_52bang_site_enjoy.enjoy
                         }
                         else
                         {
-                            MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户转账额度不符合，"+ money);
+                            MyLogUtil.WriteZhuanZhangLog(fromQQ, "用户转账额度不符合，" + money);
                             MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "用户转账额度不符合，" + money);
-                            CoolQApi.SendPrivateMsg(fromQQ, "主人，目前只支持"+SystemConfig.MoneyForWeekPay+"、"+ SystemConfig.MoneyForMonthPay + "元的充值金额，更多好玩的电影跟班，关注微信公众号[电影信封]");
+                            CoolQApi.SendPrivateMsg(fromQQ, "主人，目前只支持" + SystemConfig.MoneyForWeekPay + "、" + SystemConfig.MoneyForMonthPay + "元的充值金额，更多好玩的电影跟班，关注微信公众号[电影信封]");
                             return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                         }
-                    }catch(Exception e)
+                    }
+                    catch (Exception e)
                     {
                         //解析转账出现问题
                         MyLogUtil.ErrToLog(fromQQ, "转账失败，原因：" + e);
 
-                        MyLogUtil.WriteZhuanZhangLog(fromQQ, "转账失败"+e);
+                        MyLogUtil.WriteZhuanZhangLog(fromQQ, "转账失败" + e);
                         MyLogUtil.WriteQQDialogueLogOfMe(fromQQ, "主人，不好意思，我现在生病啦，不能为你提供资源链接，转账金额1天后自动退还，更多好玩的电影跟班，关注微信公众号[电影信封]");
                         CoolQApi.SendPrivateMsg(fromQQ, "主人，不好意思，我现在生病啦，不能为你提供资源链接，转账金额1天后自动退还，更多好玩的电影跟班，关注微信公众号[电影信封]");
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
@@ -225,12 +228,12 @@ namespace www_52bang_site_enjoy.enjoy
                     Member member = memberService.GetMemberDate(fromQQ);
                     if (member.Type == 3)// 1不是会员 2 会员过期 3 正常会员
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "会员过期时间："+member.DateDesp+ " \r\n常见命令："+ systemConfigJson.Command);
+                        CoolQApi.SendPrivateMsg(fromQQ, "会员过期时间：" + member.DateDesp + " \r\n常见命令：" + systemConfigJson.Command);
                         CoolQApi.SendPrivateMsg(fromQQ, "会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包,不支持其他金额）");
                     }
-                    else if(member.Type == 2)
+                    else if (member.Type == 2)
                     {
-                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，"+member.DateDesp+ "，会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
+                        CoolQApi.SendPrivateMsg(fromQQ, "你的会员已过期，" + member.DateDesp + "，会员价格：会员价格：" + SystemConfig.MoneyForWeekPay + "元-7天，" + SystemConfig.MoneyForMonthPay + "元30天，请转账给此QQ，进行充值（不收红包）");
                     }
                     else
                     {
@@ -243,8 +246,8 @@ namespace www_52bang_site_enjoy.enjoy
                 if ("资源".Equals(msg))
                 {
                     //付费电影资源列表
-                    
-                    CoolQApi.SendPrivateMsg(fromQQ,"查看所有资源资源码："+systemConfigJson.ResourceUrl);
+
+                    CoolQApi.SendPrivateMsg(fromQQ, "查看所有资源资源码：" + systemConfigJson.ResourceUrl);
                     CoolQApi.SendPrivateMsg(fromQQ, "也可以搜索指定电影哦，命令：搜+电影名，举例：搜黑豹");
                     return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
 
@@ -282,26 +285,27 @@ namespace www_52bang_site_enjoy.enjoy
                     if (member.Type == 3)// 1不是会员 2 会员过期 3 正常会员
                     {
                         String url = "";
-                        try { 
+                        try
+                        {
                             if (resourceInfo.Type == 2)////资源类型 1 链接直接使用 2 需使用优酷转vip的接口
                             {
-                                url = SystemConfig.ResourceApi+resourceInfo.Url;
+                                url = SystemConfig.ResourceApi + resourceInfo.Url;
                             }
                             else
                             {
                                 url = resourceInfo.Url;
                             }
                             url = MyLinkCoverter.CovertUrlInSuoIm(url);
-                            CoolQApi.SendPrivateMsg(fromQQ, "《"+resourceInfo.Name+"》"+" "+MyLinkCoverter.CovertUrlInSuoIm(resourceInfo.Url));
+                            CoolQApi.SendPrivateMsg(fromQQ, "《" + resourceInfo.Name + "》" + " " + MyLinkCoverter.CovertUrlInSuoIm(resourceInfo.Url));
                             return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
 
                         }
-                        catch(Exception e2)
+                        catch (Exception e2)
                         {
                             CoolQApi.SendPrivateMsg(fromQQ, "小喵出现问题，请过会再来尝试");
                             return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                         }
-                    
+
                     }
                     else if (member.Type == 2)
                     {
@@ -327,16 +331,16 @@ namespace www_52bang_site_enjoy.enjoy
                             CoolQApi.SendPrivateMsg(fromQQ, "此口令资源不存在，更多资源电影码：" + systemConfigJson.ResourceUrl);
                             return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                         }
-                        
-                        
-                        
+
+
+
                     }
                     catch (Exception e)//如果是4位非数字
                     {
                         CoolQApi.SendPrivateMsg(fromQQ, "此口令资源不存在，更多资源电影码：" + systemConfigJson.ResourceUrl);
                         return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
                     }
-                    
+
                 }
 
                 //以上所有资源都不匹配
@@ -345,9 +349,9 @@ namespace www_52bang_site_enjoy.enjoy
 
                 return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                MyLogUtil.ErrToLog(fromQQ, "发生不被期待的异常："+e);
+                MyLogUtil.ErrToLog(fromQQ, "发生不被期待的异常：" + e);
                 return base.ProcessPrivateMessage(subType, sendTime, fromQQ, msg, font);
             }
         }
@@ -364,7 +368,7 @@ namespace www_52bang_site_enjoy.enjoy
         public override int ProcessAddFriendRequest(int subType, int sendTime, long fromQq, string msg, string responseFlag)
         {
             //有人添加好友，直接加为我的好友
-            CoolQApi.SetFriendAddRequest(responseFlag,1, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            CoolQApi.SetFriendAddRequest(responseFlag, 1, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
 
             return base.ProcessAddFriendRequest(subType, sendTime, fromQq, msg, responseFlag);
         }
@@ -379,7 +383,7 @@ namespace www_52bang_site_enjoy.enjoy
         public override int ProcessFriendsAdded(int subType, int sendTime, long fromQq)
         {
 
-            mainForm.displayMsg2("处理好友已添加事件：" + subType+","+sendTime+","+fromQq);
+            mainForm.displayMsg2("处理好友已添加事件：" + subType + "," + sendTime + "," + fromQq);
             //给用户回复的信息日志
             MyLogUtil.WriteQQDialogueLogOfMe(fromQq, SystemConfig.MsgWhenFriendsAdded);
             CoolQApi.SendPrivateMsg(fromQq, SystemConfig.MsgWhenFriendsAdded);
@@ -400,10 +404,10 @@ namespace www_52bang_site_enjoy.enjoy
         public override int ProcessDiscussGroupMessage(int subType, int sendTime, long fromDiscuss, long fromQq, string msg, int font)
         {
 
-            mainForm.displayMsg2("处理讨论组消息：" + subType + "," + sendTime + ","+ fromDiscuss+"," + fromQq+","+msg+","+font);
+            mainForm.displayMsg2("处理讨论组消息：" + subType + "," + sendTime + "," + fromDiscuss + "," + fromQq + "," + msg + "," + font);
             return base.ProcessDiscussGroupMessage(subType, sendTime, fromDiscuss, fromQq, msg, font);
         }
-        
+
         /// <summary>
         /// 处理群管理员变动事件
         /// </summary>
@@ -429,7 +433,7 @@ namespace www_52bang_site_enjoy.enjoy
         /// <returns></returns>
         public override int ProcessGroupMemberDecrease(int subType, int sendTime, long fromGroup, long fromQq, long target)
         {
-            mainForm.displayMsg2("处理群成员数量减少事件：" + subType + "," + sendTime + "," + fromGroup +","+fromQq+ "," + target);
+            mainForm.displayMsg2("处理群成员数量减少事件：" + subType + "," + sendTime + "," + fromGroup + "," + fromQq + "," + target);
 
             return base.ProcessGroupMemberDecrease(subType, sendTime, fromGroup, fromQq, target);
         }
@@ -474,7 +478,7 @@ namespace www_52bang_site_enjoy.enjoy
         /// <returns></returns>
         public override int ProcessGroupMessage(int subType, int sendTime, long fromGroup, long fromQq, string fromAnonymous, string msg, int font)
         {
-            mainForm.displayMsg2("处理群聊消息：" + subType + "," + sendTime + "," + fromGroup + "," + fromQq + "," + fromAnonymous+","+ msg+","+font);
+            mainForm.displayMsg2("处理群聊消息：" + subType + "," + sendTime + "," + fromGroup + "," + fromQq + "," + fromAnonymous + "," + msg + "," + font);
 
             return base.ProcessGroupMessage(subType, sendTime, fromGroup, fromQq, fromAnonymous, msg, font);
         }
@@ -505,7 +509,7 @@ namespace www_52bang_site_enjoy.enjoy
         /// <returns></returns>
         public override int ProcessJoinGroupRequest(int subType, int sendTime, long fromGroup, long fromQq, string msg, string responseMark)
         {
-            mainForm.displayMsg2("处理加群请求：" + subType + "," + sendTime + "," + fromGroup + "," + fromQq + ","+msg+"," + responseMark);
+            mainForm.displayMsg2("处理加群请求：" + subType + "," + sendTime + "," + fromGroup + "," + fromQq + "," + msg + "," + responseMark);
 
             //自动加群处理
             //TODO 暂时屏蔽
